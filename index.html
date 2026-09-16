@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>腦洞量表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1A1025; --bg-card:#2A1B3D; --bg-card-2:#33224A;
+    --pink:#FF4D8D; --gold:#FFC857; --mint:#4CE0B3;
+    --text:#F4EEFA; --text-dim:#B8A8CC;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255,77,141,0.35), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(76,224,179,0.25), transparent 50%),
+      var(--bg-deep);
+    color:var(--text); min-height:100vh; display:flex; justify-content:center;
+  }
+  #app{ width:100%; max-width:480px; min-height:100vh; padding:24px 20px 40px; display:flex; flex-direction:column; }
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;margin:0;}
+  .title{ font-size:30px; font-weight:800; letter-spacing:0.5px; text-align:center; color:var(--gold); margin-bottom:2px; }
+  .subtitle{ text-align:center; color:var(--text-dim); font-size:14px; margin-bottom:28px; }
+  .card{ background:var(--bg-card); border-radius:20px; padding:22px; margin-bottom:16px; box-shadow:0 8px 24px rgba(0,0,0,0.35); }
+  input[type=text]{
+    width:100%; padding:14px 16px; border-radius:14px; border:2px solid var(--bg-card-2);
+    background:var(--bg-card-2); color:var(--text); font-size:16px; font-family:'Nunito',sans-serif;
+    margin-bottom:14px; outline:none;
+  }
+  input[type=text]:focus{border-color:var(--pink);}
+  button{
+    font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700; border:none; border-radius:14px;
+    padding:14px 18px; cursor:pointer; width:100%; color:#1A1025; background:var(--gold); transition:transform 0.08s ease;
+  }
+  button:active{transform:scale(0.97);}
+  button.secondary{ background:transparent; color:var(--text); border:2px solid var(--bg-card-2); }
+  button.pink{background:var(--pink);color:#fff;}
+  button.mint{background:var(--mint);color:#12251d;}
+  button:disabled{opacity:0.4;cursor:not-allowed;}
+  .center{text-align:center;}
+  .room-code{ font-family:'Baloo 2',sans-serif; font-size:44px; font-weight:800; letter-spacing:8px; color:var(--pink); text-align:center; margin:6px 0 4px; }
+  .hint{color:var(--text-dim);font-size:13px;text-align:center;margin-bottom:18px;}
+  .player-list{list-style:none;padding:0;margin:0;}
+  .player-list li{ display:flex;align-items:center;justify-content:space-between; padding:10px 14px; background:var(--bg-card-2); border-radius:12px; margin-bottom:8px; font-weight:700; }
+  .badge{ font-size:11px; background:var(--gold); color:#1A1025; padding:3px 8px; border-radius:20px; font-weight:800; }
+  .prompt-box{
+    background:linear-gradient(135deg, var(--pink), #C93A6E); border-radius:18px; padding:24px 20px; text-align:center;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px; line-height:1.5; margin-bottom:18px;
+    box-shadow:0 10px 26px rgba(255,77,141,0.3);
+  }
+  .prompt-main{ display:block; }
+  .prompt-scale{
+    display:block; margin-top:8px; padding-left:14px; font-size:14px; font-weight:600;
+    font-family:'Nunito',sans-serif; color:rgba(255,255,255,0.85);
+  }
+  .prompt-choice{
+    background:var(--bg-card-2); border-radius:18px; padding:20px; text-align:center;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:18px; line-height:1.5; margin-bottom:14px;
+    border:2px solid transparent; cursor:pointer;
+  }
+  .prompt-choice:active{ border-color:var(--gold); }
+  .number-card{
+    width:150px;height:150px; margin:10px auto 20px; background:var(--bg-card-2); border:4px solid var(--gold);
+    border-radius:24px; display:flex;align-items:center;justify-content:center; font-family:'Baloo 2',sans-serif;
+    font-size:72px;font-weight:800; color:var(--gold); transform:rotate(-3deg); box-shadow:0 10px 30px rgba(255,200,87,0.25);
+  }
+  .order-pick{ display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px; }
+  .chip{ background:var(--bg-card-2); padding:10px 16px; border-radius:30px; font-weight:700; cursor:pointer; border:2px solid transparent; }
+  .order-list{list-style:none;padding:0;margin:0 0 16px;}
+  .order-list li{ display:flex;align-items:center;gap:10px; background:var(--bg-card-2); padding:10px 14px;border-radius:12px;margin-bottom:8px; font-weight:700; }
+  .order-num{ width:26px;height:26px;border-radius:50%; background:var(--pink);color:#fff; display:flex;align-items:center;justify-content:center; font-size:13px;flex-shrink:0; }
+  .reveal-list{list-style:none;padding:0;margin:0 0 18px;}
+  .reveal-list li{ display:flex;align-items:center;justify-content:space-between; background:var(--bg-card-2); padding:12px 14px;border-radius:12px;margin-bottom:8px; }
+  .reveal-list li.correct{border:2px solid var(--mint);}
+  .reveal-list li.wrong{border:2px solid transparent;opacity:0.85;}
+  .reveal-num{ font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--gold); }
+  .score-line{ text-align:center;font-size:15px;color:var(--text-dim);margin-bottom:18px; }
+  .score-line b{color:var(--mint);font-size:22px;font-family:'Baloo 2',sans-serif;}
+  .waiting{ text-align:center;color:var(--text-dim); padding:40px 10px; }
+  .waiting .dot{ display:inline-block;width:8px;height:8px;border-radius:50%; background:var(--pink);margin:0 3px; animation:pulse 1.2s infinite ease-in-out; }
+  .waiting .dot:nth-child(2){animation-delay:0.2s;}
+  .waiting .dot:nth-child(3){animation-delay:0.4s;}
+  @keyframes pulse{0%,80%,100%{opacity:0.25;transform:scale(0.8);}40%{opacity:1;transform:scale(1.1);}}
+  .leaderboard{margin-top:auto;padding-top:10px;}
+  .leaderboard-row{ display:flex;justify-content:space-between; padding:8px 4px;font-size:14px;color:var(--text-dim); border-bottom:1px solid var(--bg-card-2); }
+  .leaderboard-row.top{color:var(--gold);font-weight:800;}
+  .error{color:var(--pink);font-size:13px;text-align:center;margin-top:-6px;margin-bottom:10px;min-height:16px;}
+  .footer-note{text-align:center;color:var(--text-dim);font-size:12px;margin-top:20px;}
+  .setup-warning{
+    background:#4a1f2a; border:2px solid var(--pink); border-radius:14px; padding:16px; margin-bottom:20px;
+    font-size:13px; line-height:1.6; color:var(--text);
+  }
+  .setup-warning code{ background:var(--bg-card-2); padding:1px 5px; border-radius:4px; }
+  #bgmToggle{
+    position:fixed; top:16px; right:16px; width:46px; height:46px;
+    border-radius:50%; background:var(--bg-card-2); color:var(--text);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; padding:0; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.35);
+  }
+</style>
+</head>
+<body>
+<audio id="bgmAudio" loop preload="none">
+  <source src="bgm.ogg" type="audio/ogg">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+<audio id="btnClickAudio" preload="auto">
+  <source src="button06.mp3" type="audio/mpeg">
+</audio>
+<button id="bgmToggle" title="背景音樂開關">🔈</button>
+<div id="app"></div>
+
+<!-- Firebase SDK（免費，Google 提供的即時資料庫） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* ======================================================================
+   設定步驟（大約 5 分鐘，一次就好）：
+
+   1. 前往 https://console.firebase.google.com ，用 Google 帳號登入，
+      點「新增專案」建立一個免費專案（名字隨便取）。
+
+   2. 左側選單找「Build > Realtime Database」，按「建立資料庫」，
+      地區隨意，安全性規則先選「測試模式」（30 天內公開讀寫，
+      這是派對遊戲用的暫存資料，沒有個資，選測試模式最省事）。
+
+   3. 左側選單「專案設定」(齒輪圖示) > 一路往下找「你的應用程式」，
+      按網頁圖示 "</>" 新增一個網頁應用程式，取名隨意，
+      不需要勾選 Firebase Hosting。
+
+   4. 複製它給你的 firebaseConfig 物件，整段貼進下面
+      CONFIG 變數，取代目前的範例值。
+
+   5. 把這支 .html 檔案放到任何靜態空間即可讓朋友連線，例如：
+      - https://app.netlify.com/drop 直接把檔案拖進去，立刻拿到網址
+      - GitHub Pages / Firebase Hosting 也都可以
+
+   完成以上步驟後，直接打開網址就能建立/加入房間，不需要任何登入。
+   ====================================================================== */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAzIoe2mml0EJBz2gsr6m5lqQCViatdm5g",
+  authDomain: "brain-game-c4699.firebaseapp.com",
+  databaseURL: "https://brain-game-c4699-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "brain-game-c4699",
+};
+
+const CONFIG_IS_PLACEHOLDER = firebaseConfig.apiKey.indexOf("填入") !== -1;
+
+let fdb = null;
+if(!CONFIG_IS_PLACEHOLDER){
+  firebase.initializeApp(firebaseConfig);
+  fdb = firebase.database();
+}
+
+const PROMPTS = [
+"說出符合這個國家的旅遊難易度（1是最簡單 10是最難）",
+"說出做這件事的疲憊程度（1是最輕鬆 10是最疲憊）",
+"你在可麗餅裡放什麼料（1是最噁心 10是最美味）",
+"不幸被困在無人島上，最希望獲得什麼（1是最沒用 10是最有用）",
+"烤肉時每個人要帶一樣食材，你會帶什麼（1是最奇怪 10是最常見的）",
+"說出一個性癖（1是最奇怪 10是最正常）",
+"用手機搜尋一部A片（1是最無感 10是最有感）",
+"你們闖進我房間，看見誰跟我在親熱（1是最難以置信 10是最合理）",
+"說出一種殺人的方式（1是最獵奇 10是最常見）",
+"說出一種自慰的工具（1是最獵奇 10是最常見）",
+"說出一個Google 地圖上會出現的餐廳評論（1是最想去 10是最不想去）",
+"找出一個人跟我單挑（1會被我痛毆 10我會被痛扁）",
+"我獲得一個超能力（1是最沒用 10是最實用）",
+"說出我寫給暗戀對象的情書內容（1是最沒希望 10是一定會成功）",
+"打出一篇我的現實動態（1是最emo 10是最開心）",
+"我被外星人抓走，他們對我…（1是最難以置信 10是最普通）",
+"10年後的我正在做的工作（1是最慘 10是最好）",
+"立刻播一首歌，對我來說（1是最難聽 10是超好聽）",
+"選一個要送我的生日禮物（1是最糟 10是最喜歡）",
+"大學開學第一天，幫我穿搭（1是最怪 10是最帥潮）",
+"我在打某個遊戲的世界賽，我做了…（1是祖墳被爆破 10是成為傳奇）",
+"我在逛夜市，買了…（1是最討厭 10是最喜歡）",
+"我去吃義大利麵，點了…（1是最便宜 10是最貴）",
+"有一天我和超帥（正）下屬出差，要用什麼理由跟他睡同一間（1是最容易失敗 10是最容易成功）",
+"唱一個sol（1是最低音 10是最高音）",
+"說一個壞習慣（1是最壞 10是最無傷大雅）",
+"我考上XX大學（1是最爛 10是最好）",
+"說出一個性愛體位（1是最難 10是最簡單）",
+"說出一串密碼（1是強度最弱 10是強度最強）",
+"我做了一個夢，內容是…（1是最可怕 10是最美好）",
+"今天去露營，我帶了…（1是最沒用 10是最實用）",
+"說出一個出現在我的婚禮的人（1是最荒謬 10是最合理）",
+"說出一個打炮的地點（1是最荒謬 10是最常見）",
+"在捷運上遇到持刀歹徒，我使用XX當作武器（1是最爛 10是最強）",
+"幫我女兒取名字（1是最荒謬 10是最正常）",
+"如果我中了一億，我第一個買的東西是…（1是最荒謬 10是最正常）",
+"說一個最讓人性幻想的職業（1是最沒感覺 10是最有感覺）",
+"在路上被惡意逼車，我會…（1是最慫 10是最火爆）",
+"你在急診室值班時，病患的肛門裡出現了XX（1是最合理 10是最荒謬）",
+"做愛到一半我說了…（1是最冷場 10是最色情）",
+"幫成人主題樂園的遊樂設施取名字（1是最無聊 10是最好笑）",
+"開車的時候導航說了…（1是最荒謬 10是最好笑）",
+"你正在搶劫，衝進銀行的時候我說…（1是最無聊 10是最好笑）",
+"你會怎麼處理自己掉在地上的屎（1是最隱密 10是最引人注目）",
+"你撞到只會講英文的外國人，你要怎麼道歉（1是最合理 10是最好笑）",
+"你要幫朋友訂飛機餐，我幫他選了（1是最合理 10是最好笑）",
+"如何處理爺爺的骨灰（1是最合理 10是最荒謬）",
+"幫另一半取暱稱（1是最合理 10是最荒謬）",
+"你被捉姦在床，說一句話為自己辯護（1是最可能被接受 10是最不可能被接受）",
+"起床發現身邊躺了一個人，他是…（1是最合理 10是最荒謬）",
+"說出我的性幻想對象（1是最討厭 10是最喜歡）",
+"和伴侶在床上時，對方突然拿出…（1是最普通 10是最荒謬）",
+"用一句話罵我或羞辱我（1是最輕 10是最重）",
+"你是法庭上的被告，你因為酒駕撞死人，說一句話為自己辯護（1是會被重判 10是會被輕判）",
+"搜尋一張內衣的商品照（1是最普通 10是最色情）",
+"找一個好笑的短影片（1是最冷場 10是最好笑）",
+"找一個電器產品（1是最常見 10是最稀有）",
+"我要買一台XX牌XX型號的車（1是最便宜 10是最貴）",
+"我幫小學的小孩選XX才藝課（1是最沒用 10是最有用）",
+"我是MLB世界大賽的關門投手，現在九局下，領先一分，兩出局，兩好三壞，我…（1是最普通 10是最不可思議）",
+"我是空服員，乘客提出前面好像還有空位，能不能幫她升級商務艙，我…（1是最合理 10是最不合理）",
+"在相簿裡找一張色情照片（1是最無感 10是最有感）",
+"唸一部YT影片的標題（1是最沒興趣 10是超有興趣）",
+"幫我安排一份旅遊計劃（1是最隨便 10是最詳細）",
+"寫一封詐騙郵件（1最容易被識破 10最容易點開）",
+"如果…沒有…，台灣就……（1是最普通 10是最好笑）",
+"找一張同性戀照片（1是最不像 10是最像）",
+"做一個罰球線投籃的動作（1是不會打球 10是庫里）",
+"假設我在當兵新訓期間，做了什麼事讓鄰兵討厭（1還好 10討厭）",
+"假設我是公司老闆，我的員工福利是什麼（1超爛 10超好）",
+"在蝦皮找一個情趣用品（1最便宜 10最貴）",
+"說一個台灣地名（1最無名 10最有名）",
+"我的隊友打遊戲超戳，痛罵他一頓（1最輕微 10最兇狠）",
+"我是新訓班長，我的訓員做了什麼事情，害你被連長噴（1是最輕微 10是最嚴重）",
+"我因為做了...，所以在班上被排擠（1是最正常 10是最怪）",
+"我在直播主的聊天室傳...，所以被她禁言（1是最輕微 10是最嚴重）",
+"我在槍店買了......，準備去搶銀行，結果被店員笑（1是最正常 10是最好笑）",
+"我在大學宿舍半夜拉肚子在床上，我會...，為了不讓室友發現（1是最正常 10是最荒唐）",
+"我在隔宿露營...，被老師罵（1是最合理 10是最荒謬）",
+"我畢業旅行的時候在飯店房間...，被飯店告狀給校方（1是最合理 10是最荒謬）",
+"我在搭飛機時...，導致全部人陪我陪葬（1是最合理 10是最荒謬）",
+"性愛結束後，對方嘴裡都是你自己的體液，且她跟你索吻，你會說什麼拒絕（1是最合理 10是最荒謬）",
+"我因為在走廊...，被教官追殺（1是最合理 10是最好笑）",
+"大喊：「屁眼！」（1是最悲傷 10是最高興）",
+"大喊：「你還是個人嗎！」（1是最平淡 10是最憤怒）",
+"大喊：「我好想舔你的皮炎！」（1是最委屈 10是最興奮）",
+"在Yoasobi Heaven搜尋一間我最喜歡的店（1是最還好 10是最喜歡）",
+"找一台摩托車的照片（1是最醜 10是最帥）",
+"我因為...，不小心得到了性病（1是最合理 10是最荒謬）",
+"因為我的雲端硬碟放了大量的...，駭客直接不駭了（1是最合理 10是最荒唐）"
+];
+
+let myId = null;
+let myName = "";
+let roomCode = null;
+let room = null;
+let roomRef = null;
+let orderPicking = [];
+
+// ---------- 音效（不需要額外音檔，直接合成） ----------
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
+  }
+  return audioCtx;
+}
+function beep(freq, duration, type, vol, delay){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  setTimeout(()=>{
+    try{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.value = vol || 0.12;
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.stop(ctx.currentTime + duration);
+    }catch(e){}
+  }, delay || 0);
+}
+function sfxClick(){
+  const base = document.getElementById('btnClickAudio');
+  if(base){
+    try{
+      const clone = base.cloneNode(true);
+      clone.volume = 0.7;
+      clone.play().catch(()=>{});
+      return;
+    }catch(e){}
+  }
+  beep(500, 0.07, 'square', 0.07);
+}
+function sfxDraw(){ beep(660, 0.12, 'sine', 0.12); beep(880, 0.16, 'sine', 0.12, 100); }
+function sfxReveal(){ beep(440, 0.15, 'triangle', 0.12); }
+function sfxResult(){ beep(523, 0.1, 'sine', 0.14); beep(659, 0.1, 'sine', 0.14, 90); beep(784, 0.22, 'sine', 0.14, 180); }
+function sfxRound(){ beep(392, 0.15, 'sine', 0.12); }
+
+// ---------- 背景音樂開關 ----------
+let bgmPlaying = false;
+function toggleBgm(){
+  const audio = document.getElementById('bgmAudio');
+  const btn = document.getElementById('bgmToggle');
+  if(!audio) return;
+  if(bgmPlaying){
+    audio.pause();
+    bgmPlaying = false;
+    if(btn) btn.textContent = '🔈';
+  }else{
+    audio.play().then(()=>{
+      bgmPlaying = true;
+      if(btn) btn.textContent = '🔊';
+    }).catch(()=>{
+      if(btn) btn.textContent = '🔈';
+    });
+  }
+}
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function roomCodeGen(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let s="";
+  for(let i=0;i<4;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// 把題目文字拆成「主要敘述」和「（1...10...）刻度說明」兩段，方便換行縮排顯示
+function splitPromptText(text){
+  const match = text.match(/^([\s\S]*?)([（(][^（(]*[）)])\s*$/);
+  if(match){
+    return { main: match[1], scale: match[2] };
+  }
+  return { main: text, scale: '' };
+}
+function promptBoxHtml(idx, extraClass){
+  const parts = splitPromptText(PROMPTS[idx]);
+  return `
+    <div class="prompt-box ${extraClass||''}">
+      <span class="prompt-main">${parts.main}</span>
+      ${parts.scale ? `<span class="prompt-scale">${parts.scale}</span>` : ''}
+    </div>
+  `;
+}
+function promptChoiceHtml(idx){
+  const parts = splitPromptText(PROMPTS[idx]);
+  return `
+    <div class="prompt-choice" data-idx="${idx}">
+      <span class="prompt-main">${parts.main}</span>
+      ${parts.scale ? `<span class="prompt-scale">${parts.scale}</span>` : ''}
+    </div>
+  `;
+}
+
+function subscribeRoom(code){
+  if(roomRef) roomRef.off();
+  roomRef = fdb.ref('rooms/'+code);
+  roomRef.on('value', (snap)=>{
+    if(snap.exists()){
+      room = snap.val();
+      // Firebase 會把稀疏陣列/空陣列變成 undefined，這裡補回空陣列
+      if(!room.players) room.players = [];
+      if(!room.usedPrompts) room.usedPrompts = [];
+      if(!room.scores) room.scores = {};
+      render();
+    }
+  }, (err)=>{
+    console.error(err);
+    showError('連線發生問題：'+err.message);
+  });
+}
+
+async function updateRoom(patch){
+  if(!fdb || !roomCode) return;
+  const merged = {...room, ...patch};
+  try{
+    await fdb.ref('rooms/'+roomCode).set(merged);
+    room = merged;
+    render();
+  }catch(e){
+    console.error('write failed', e);
+    showError('資料同步失敗，請稍後再試');
+  }
+}
+
+// ---------- Game actions ----------
+
+async function createRoom(){
+  const nameInput = document.getElementById('nameInput');
+  const name = nameInput.value.trim();
+  if(!name){ showError('請先輸入你的暱稱'); return; }
+  if(!fdb){ showError('尚未設定 Firebase，請先依照檔案開頭的說明填入你的設定'); return; }
+  myId = uid();
+  myName = name;
+  roomCode = roomCodeGen();
+  const initial = {
+    code: roomCode,
+    players: [{id:myId, name:myName}],
+    hostId: myId,
+    phase: 'lobby',
+    judgeIndex: 0,
+    round: 0,
+    usedPrompts: [],
+    roundData: null,
+    scores: {}
+  };
+  try{
+    await fdb.ref('rooms/'+roomCode).set(initial);
+  }catch(e){
+    showError('建立房間失敗：'+e.message);
+    return;
+  }
+  room = initial;
+  subscribeRoom(roomCode);
+  render();
+}
+
+async function joinRoom(){
+  const nameInput = document.getElementById('nameInputJoin');
+  const codeInput = document.getElementById('codeInput');
+  const name = nameInput.value.trim();
+  const code = codeInput.value.trim().toUpperCase();
+  if(!name){ showError('請先輸入你的暱稱'); return; }
+  if(!code){ showError('請輸入房間代碼'); return; }
+  if(!fdb){ showError('尚未設定 Firebase，請先依照檔案開頭的說明填入你的設定'); return; }
+  let snap;
+  try{
+    snap = await fdb.ref('rooms/'+code).once('value');
+  }catch(e){
+    showError('讀取房間失敗：'+e.message);
+    return;
+  }
+  if(!snap.exists()){ showError('找不到這個房間，確認代碼是否正確'); return; }
+  const data = snap.val();
+  if(!data.players) data.players = [];
+  myId = uid();
+  myName = name;
+  roomCode = code;
+  const updatedPlayers = [...data.players, {id:myId, name:myName}];
+  try{
+    await fdb.ref('rooms/'+code+'/players').set(updatedPlayers);
+  }catch(e){
+    showError('加入房間失敗：'+e.message);
+    return;
+  }
+  room = {...data, players: updatedPlayers};
+  subscribeRoom(roomCode);
+  render();
+}
+
+async function startGame(){
+  if(room.players.length < 3){ showError('至少需要 3 位玩家才能開始'); return; }
+  sfxDraw();
+  await updateRoom({ phase:'draw', judgeIndex:0, round:1 });
+}
+
+async function drawPromptOptions(){
+  sfxDraw();
+  let available = PROMPTS.map((_,i)=>i).filter(i=>!room.usedPrompts.includes(i));
+  if(available.length < 2){ available = PROMPTS.map((_,i)=>i); }
+  const options = shuffle(available).slice(0, 2);
+
+  await updateRoom({
+    phase: 'choosing',
+    roundData: { promptOptions: options }
+  });
+}
+
+async function choosePrompt(idx){
+  sfxClick();
+  const judge = room.players[room.judgeIndex];
+  const others = room.players.filter(p=>p.id!==judge.id);
+  const pool = shuffle([1,2,3,4,5,6,7,8,9,10]).slice(0, others.length);
+  const numbers = {};
+  others.forEach((p,i)=>{ numbers[p.id]=pool[i]; });
+
+  let used = room.usedPrompts;
+  if(used.length >= PROMPTS.length){ used = []; }
+
+  await updateRoom({
+    usedPrompts: [...used, idx],
+    phase: 'playing',
+    roundData: { promptIndex: idx, numbers, order: [], phase: 'acting' }
+  });
+}
+
+async function moveToGuessing(){
+  sfxClick();
+  await updateRoom({ roundData: {...room.roundData, phase:'guessing'} });
+}
+
+function pickOrder(pid){
+  if(orderPicking.includes(pid)) return;
+  sfxClick();
+  orderPicking.push(pid);
+  render();
+}
+function undoOrder(){
+  sfxClick();
+  orderPicking.pop();
+  render();
+}
+
+async function submitOrder(){
+  const judge = room.players[room.judgeIndex];
+  const others = room.players.filter(p=>p.id!==judge.id);
+  if(orderPicking.length !== others.length) return;
+
+  const actualSorted = [...others].sort((a,b)=>room.roundData.numbers[a.id]-room.roundData.numbers[b.id]);
+  let correct = 0;
+  actualSorted.forEach((p,i)=>{ if(orderPicking[i]===p.id) correct++; });
+
+  sfxResult();
+  const prevScore = room.scores[judge.id] || 0;
+  await updateRoom({
+    roundData: { ...room.roundData, order:[...orderPicking], phase:'revealed', correctCount:correct, total:others.length },
+    scores: { ...room.scores, [judge.id]: prevScore + correct }
+  });
+  orderPicking = [];
+}
+
+async function nextRound(){
+  sfxRound();
+  await updateRoom({
+    judgeIndex: (room.judgeIndex + 1) % room.players.length,
+    round: room.round + 1,
+    roundData: null,
+    phase: 'draw'
+  });
+}
+
+function showError(msg){
+  const el = document.getElementById('errorBox');
+  if(el) el.textContent = msg;
+  else console.warn(msg);
+}
+
+// ---------- Rendering ----------
+
+function render(){
+  const app = document.getElementById('app');
+
+  if(CONFIG_IS_PLACEHOLDER){
+    app.innerHTML = `
+      <div class="title">腦洞量表</div>
+      <div class="subtitle">和朋友用手機一起玩的排序猜謎派對遊戲</div>
+      <div class="setup-warning">
+        還沒完成設定喔！請打開這支 .html 檔案，找到 <code>firebaseConfig</code>，
+        依照上方註解的 5 個步驟填入你自己 Firebase 專案的設定值，存檔後重新整理這個頁面即可。
+      </div>
+    `;
+    return;
+  }
+
+  if(!room){
+    app.innerHTML = renderHome();
+    attachHandlers();
+    return;
+  }
+  const judge = room.players[room.judgeIndex];
+  const isJudge = judge && judge.id === myId;
+  const isHost = room.hostId === myId;
+
+  let body = '';
+  if(room.phase === 'lobby'){
+    body = renderLobby(isHost);
+  } else if(room.phase === 'draw'){
+    body = renderDraw(judge, isJudge);
+  } else if(room.phase === 'choosing'){
+    body = renderChoosing(judge, isJudge);
+  } else if(room.phase === 'playing'){
+    const rp = room.roundData.phase;
+    if(rp === 'acting') body = renderActing(judge, isJudge);
+    else if(rp === 'guessing') body = renderGuessing(judge, isJudge);
+    else if(rp === 'revealed') body = renderRevealed(judge, isJudge, isHost);
+  }
+
+  app.innerHTML = `
+    <div class="title">腦洞量表</div>
+    <div class="subtitle">房號 ${roomCode} · 第 ${room.round||0} 回合</div>
+    ${body}
+    ${renderLeaderboard()}
+  `;
+  attachHandlers();
+}
+
+function renderHome(){
+  return `
+    <div class="title">腦洞量表</div>
+    <div class="subtitle">和朋友用手機一起玩的排序猜謎派對遊戲</div>
+    <div class="card">
+      <h3 style="margin-bottom:12px;">建立新房間</h3>
+      <input type="text" id="nameInput" placeholder="輸入房間名稱" maxlength="10">
+      <button id="btnCreate">建立房間</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:12px;">加入房間</h3>
+      <input type="text" id="nameInputJoin" placeholder="輸入你的暱稱" maxlength="10">
+      <input type="text" id="codeInput" placeholder="輸入 4 碼房間代碼" maxlength="4" style="text-transform:uppercase;">
+      <button id="btnJoin" class="pink">加入房間</button>
+    </div>
+    <div class="error" id="errorBox"></div>
+    <div class="footer-note">建立房間的人先開，其他人再輸入同一組代碼加入。不需要登入任何帳號。</div>
+  `;
+}
+
+function renderLobby(isHost){
+  const list = room.players.map(p=>`
+    <li>${p.name}${p.id===room.hostId?' <span class="badge">房主</span>':''}${p.id===myId?' (你)':''}</li>
+  `).join('');
+  return `
+    <div class="card">
+      <div class="room-code">${roomCode}</div>
+      <div class="hint">把這組代碼分享給朋友加入</div>
+      <ul class="player-list">${list}</ul>
+    </div>
+    <div class="error" id="errorBox"></div>
+    ${isHost
+      ? `<button id="btnStart" ${room.players.length<3?'disabled':''}>開始遊戲${room.players.length<3?'（至少 3 人）':''}</button>`
+      : `<div class="waiting">等待房主開始遊戲<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`
+    }
+  `;
+}
+
+function renderDraw(judge, isJudge){
+  if(isJudge){
+    return `
+      <div class="card center">
+        <h3 style="margin-bottom:10px;">輪到你出題了！</h3>
+        <div class="hint" style="margin-bottom:16px;">按下按鈕會抽出兩個題目，你可以自己挑一個比較喜歡的來出。</div>
+        <button id="btnDraw" class="pink">抽題目</button>
+      </div>
+      <div class="error" id="errorBox"></div>
+    `;
+  }
+  return `
+    <div class="card center">
+      <h3 style="margin-bottom:8px;">出題者：${judge.name}</h3>
+      <div class="waiting">等待抽題<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    </div>
+  `;
+}
+
+function renderChoosing(judge, isJudge){
+  if(!isJudge){
+    return `
+      <div class="card center">
+        <h3 style="margin-bottom:8px;">出題者：${judge.name}</h3>
+        <div class="waiting">出題者正在兩個題目中挑一個<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      </div>
+    `;
+  }
+  const opts = room.roundData.promptOptions;
+  return `
+    <div class="card center" style="padding-bottom:12px;">
+      <h3 style="margin-bottom:6px;">挑一個題目</h3>
+      <div class="hint" style="margin-bottom:0;">點選你想出的那一題</div>
+    </div>
+    ${opts.map(idx=>promptChoiceHtml(idx)).join('')}
+    <div class="error" id="errorBox"></div>
+  `;
+}
+
+function renderActing(judge, isJudge){
+  if(isJudge){
+    return `
+      ${promptBoxHtml(room.roundData.promptIndex)}
+      <div class="hint" style="margin-bottom:16px;">其他玩家正在依照自己的數字做動作，觀察完大家的表現後，按下方按鈕開始排序。</div>
+      <button id="btnToGuess" class="mint">大家都做完了，開始排序</button>
+    `;
+  }
+  const myNum = room.roundData.numbers[myId];
+  return `
+    ${promptBoxHtml(room.roundData.promptIndex)}
+    <div class="hint">你的數字（只有你看得到）</div>
+    <div class="number-card">${myNum}</div>
+    <div class="hint" style="margin-bottom:16px;">依照這個數字，做出符合題目的動作或回答，讓出題者猜出大家的排序吧！</div>
+    <div class="waiting">等待出題者結束觀察<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  `;
+}
+
+function renderGuessing(judge, isJudge){
+  const others = room.players.filter(p=>p.id!==judge.id);
+  if(!isJudge){
+    return `
+      ${promptBoxHtml(room.roundData.promptIndex)}
+      <div class="waiting">出題者正在排序，稍等一下<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    `;
+  }
+  const remaining = others.filter(p=>!orderPicking.includes(p.id));
+  const pickedList = orderPicking.map((pid,i)=>{
+    const p = others.find(x=>x.id===pid);
+    return `<li><span class="order-num">${i+1}</span>${p.name}</li>`;
+  }).join('');
+  return `
+    ${promptBoxHtml(room.roundData.promptIndex)}
+    <div class="card">
+      <h3 style="margin-bottom:10px;">依照你判斷「由小到大」依序點選玩家</h3>
+      <div class="order-pick">
+        ${remaining.map(p=>`<div class="chip" data-pid="${p.id}">${p.name}</div>`).join('')}
+      </div>
+      ${pickedList ? `<ol class="order-list">${pickedList}</ol>` : ''}
+      <div style="display:flex;gap:10px;">
+        <button class="secondary" id="btnUndo" ${orderPicking.length===0?'disabled':''}>回上一步</button>
+        <button class="mint" id="btnSubmitOrder" ${orderPicking.length!==others.length?'disabled':''}>確定排序</button>
+      </div>
+    </div>
+    <div class="error" id="errorBox"></div>
+  `;
+}
+
+function renderRevealed(judge, isJudge, isHost){
+  const others = room.players.filter(p=>p.id!==judge.id);
+  const actualSorted = [...others].sort((a,b)=>room.roundData.numbers[a.id]-room.roundData.numbers[b.id]);
+  const guessOrder = room.roundData.order;
+
+  const items = actualSorted.map((p,i)=>{
+    const correct = guessOrder[i] === p.id;
+    return `<li class="${correct?'correct':'wrong'}">
+      <span>${i+1}. ${p.name}</span>
+      <span class="reveal-num">${room.roundData.numbers[p.id]}</span>
+    </li>`;
+  }).join('');
+
+  return `
+    ${promptBoxHtml(room.roundData.promptIndex)}
+    <div class="card">
+      <h3 style="margin-bottom:12px;">正確排序（由小到大）</h3>
+      <ul class="reveal-list">${items}</ul>
+      <div class="score-line">${judge.name} 這輪猜對 <b>${room.roundData.correctCount} / ${room.roundData.total}</b></div>
+    </div>
+    ${isHost
+      ? `<button id="btnNextRound" class="pink">下一輪（換 ${room.players[(room.judgeIndex+1)%room.players.length].name} 出題）</button>`
+      : `<div class="waiting">等待房主開始下一輪<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`
+    }
+  `;
+}
+
+function renderLeaderboard(){
+  if(!room || !room.players || room.players.length===0) return '';
+  const scores = room.players.map(p=>({name:p.name, score: room.scores[p.id]||0}))
+    .sort((a,b)=>b.score-a.score);
+  if(scores.every(s=>s.score===0)) return '';
+  const maxScore = scores[0].score;
+  const rows = scores.map(s=>`
+    <div class="leaderboard-row ${s.score===maxScore && maxScore>0?'top':''}">
+      <span>${s.name}</span><span>${s.score} 分</span>
+    </div>
+  `).join('');
+  return `<div class="leaderboard"><h3 style="font-size:14px;color:var(--text-dim);margin-bottom:6px;">出題者積分榜</h3>${rows}</div>`;
+}
+
+function attachHandlers(){
+  const btnCreate = document.getElementById('btnCreate');
+  if(btnCreate) btnCreate.onclick = createRoom;
+  const btnJoin = document.getElementById('btnJoin');
+  if(btnJoin) btnJoin.onclick = joinRoom;
+  const btnStart = document.getElementById('btnStart');
+  if(btnStart) btnStart.onclick = startGame;
+  const btnDraw = document.getElementById('btnDraw');
+  if(btnDraw) btnDraw.onclick = drawPromptOptions;
+  const promptChoices = document.querySelectorAll('.prompt-choice');
+  promptChoices.forEach(c=> c.onclick = ()=>choosePrompt(parseInt(c.dataset.idx, 10)));
+  const btnToGuess = document.getElementById('btnToGuess');
+  if(btnToGuess) btnToGuess.onclick = moveToGuessing;
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c=> c.onclick = ()=>pickOrder(c.dataset.pid));
+  const btnUndo = document.getElementById('btnUndo');
+  if(btnUndo) btnUndo.onclick = undoOrder;
+  const btnSubmitOrder = document.getElementById('btnSubmitOrder');
+  if(btnSubmitOrder) btnSubmitOrder.onclick = submitOrder;
+  const btnNextRound = document.getElementById('btnNextRound');
+  if(btnNextRound) btnNextRound.onclick = nextRound;
+}
+
+const bgmToggleBtn = document.getElementById('bgmToggle');
+if(bgmToggleBtn) bgmToggleBtn.onclick = toggleBgm;
+
+render();
+</script>
+</body>
+</html>
